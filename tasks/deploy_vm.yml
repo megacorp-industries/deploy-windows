@@ -1,0 +1,57 @@
+- name: Check vm image
+  stat:
+    path: "{{ libvirt_domain_path }}/{{ vm_name }}.qcow2"
+  register: vm_disk_stat
+
+- name: Clone template image
+  copy:
+    src: "{{ libvirt_domain_path }}/{{ image_name }}"
+    dest: "{{ libvirt_domain_path }}/{{ vm_name}}.qcow2"
+    remote_src: true
+  when: not vm_disk_stat.stat.exists
+
+- name: Get domain info
+  virt:
+    command: info
+  register: domain_info
+
+  # https://github.com/jedi4ever/veewee/issues/996
+  - name: Set disk acl to allow qemu to access
+    acl:
+      path: "{{ libvirt_domain_path }}/{{ vm_name }}.qcow2"
+      entity: qemu
+      etype: user
+      permissions: rw
+      state: present
+    # Only resize disk when vm doesn't already exist
+  when: "'{{ vm_name }}' not in domain_info"
+
+- name: Create domain
+  virt:
+    command: define
+    xml: "{{ lookup('template', 'domain.xml.j2') }}"
+  register: create_domain
+
+- name: Start domain
+  virt:
+    state: running
+    name: "{{ vm_name }}"
+  # Sometimes this task will fail with "Failed to get "write" lock" error
+  failed_when: false
+  when: create_domain.changed
+
+# Fallback when virt module doesn't work
+#- name: Create domain
+#  command:
+#    cmd: "virt-install
+#          --connect qemu:///system
+#          -n {{ vm_name }}
+#          --memory {{ vm_memory }}
+#          --vcpus {{ vm_cpus }}
+#          --import
+#          --os-variant=fedora{{ fedora_version }}
+#          --disk {{ libvirt_domain_path }}/{{ vm_name }}.qcow2
+#          --network network={{ vm_network_name }},model=virtio,mac={{ vm_mac }}
+#          --graphics=none
+#          --qemu-commandline=\"-fw_cfg name=opt/com.coreos/config,file={{ ignition_path }}\"
+#          --noautoconsole"

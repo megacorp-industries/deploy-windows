@@ -1,0 +1,17 @@
+- name: Teardown Windows virtual machine
+  import_tasks: teardown.yml
+  when: teardown | default(false)
+
+- name: Deploy Windows virtual machine
+  block:
+  - name: Configure prerequisites
+    import_tasks: configure_prerequisites.yml
+    tags:
+    - configure_prerequisites
+
+  - name: Deploy virtual machine
+    import_tasks: deploy_vm.yml
+    tags:
+    - deploy_vm
+  when: not teardown | default(false)
+
