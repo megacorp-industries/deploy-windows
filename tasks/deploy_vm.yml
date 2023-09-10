@@ -16,15 +16,15 @@
   register: domain_info
 
 # https://github.com/jedi4ever/veewee/issues/996
-- name: Set disk acl to allow qemu to access
-  acl:
-    path: "{{ libvirt_domain_path }}/{{ vm_name }}.qcow2"
-    entity: qemu
-    etype: user
-    permissions: rw
-    state: present
-  # Only resize disk when vm doesn't already exist
-  when: "'{{ vm_name }}' not in domain_info"
+# - name: Set disk acl to allow qemu to access
+#   acl:
+#     path: "{{ libvirt_domain_path }}/{{ vm_name }}.qcow2"
+#     entity: qemu
+#     etype: user
+#     permissions: rw
+#     state: present
+#   # Only resize disk when vm doesn't already exist
+#   when: "'{{ vm_name }}' not in domain_info"
 
 - name: Create domain
   virt:
