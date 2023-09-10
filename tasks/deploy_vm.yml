@@ -24,7 +24,7 @@
     permissions: rw
     state: present
   # Only resize disk when vm doesn't already exist
-when: "'{{ vm_name }}' not in domain_info"
+  when: "'{{ vm_name }}' not in domain_info"
 
 - name: Create domain
   virt:
