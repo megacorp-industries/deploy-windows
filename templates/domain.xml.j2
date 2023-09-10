@@ -1,14 +1,12 @@
 <domain type="kvm">
-  <name>win2k22</name>
-  <uuid>2831fdb0-8e11-4f9b-bb2c-755d7790b833</uuid>
+  <name>{{ vm_name }}</name>
   <metadata>
     <libosinfo:libosinfo xmlns:libosinfo="http://libosinfo.org/xmlns/libvirt/domain/1.0">
       <libosinfo:os id="http://microsoft.com/win/2k22"/>
     </libosinfo:libosinfo>
   </metadata>
-  <memory>4096000</memory>
-  <currentMemory>4096000</currentMemory>
-  <vcpu>2</vcpu>
+  <memory unit='MiB'>{{ vm_memory }}</memory>
+  <vcpu placement='static'>{{ vm_cpus }}</vcpu>
   <os>
     <type arch="x86_64" machine="q35">hvm</type>
     <loader readonly="yes" type="pflash">/usr/share/edk2/ovmf/OVMF_CODE.fd</loader>
@@ -39,7 +37,7 @@
     <emulator>/usr/bin/qemu-system-x86_64</emulator>
     <disk type="file" device="disk">
       <driver name="qemu" type="qcow2"/>
-      <source file="/var/lib/libvirt/images/Win2022_20324.qcow2"/>
+      <source file='{{ libvirt_domain_path }}/{{ vm_name }}.qcow2'/>
       <target dev="sda" bus="sata"/>
     </disk>
     <controller type="usb" model="qemu-xhci" ports="15"/>
@@ -58,9 +56,8 @@
     <controller type="pci" model="pcie-root-port"/>
     <controller type="pci" model="pcie-root-port"/>
     <controller type="pci" model="pcie-root-port"/>
-    <interface type="bridge">
-      <source bridge="br0"/>
-      <mac address="52:54:00:5e:93:87"/>
+    <interface type="{{ vm_interface_type }}">
+      <source bridge="{{ vm_network_bridge }}"/>
       <model type="e1000e"/>
     </interface>
     <console type="pty"/>
